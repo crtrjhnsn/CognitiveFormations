@@ -1,7 +1,22 @@
 # AP® Biology source materials
 
 The unit outline in `course.json` is written in our own words. Source files are
-not committed to this repository; upload them through the owner dashboard.
+not committed to this repository. Until the owner dashboard exists, put them in
+a folder with a `manifest.json` and run `npm run generate` (see the main README):
+
+```json
+{
+  "attestation": "I wrote these notes, or hold the rights to use them commercially and with AI tools.",
+  "files": [
+    { "file": "unit1-notes.md", "role": "own_notes", "license": "own work" },
+    { "file": "practice-test.pdf", "role": "past_exam", "license": "own work" }
+  ]
+}
+```
+
+Roles: `syllabus`, `slides`, `textbook`, `past_exam`, `own_notes`. Files not in
+the manifest are ignored. Past exams are never shown to the drafting model;
+they are only used to catch generated questions that copy them.
 
 Allowed sources:
 

@@ -1,11 +1,15 @@
 import { z } from "zod";
 
-// Shape every multiple-choice item uses (spec: "Prompts and schemas").
+// The model cites a short exact quote; code finds its character span in the
+// chunk (stored as item_citations.quote_start/quote_end). Asking for the quote
+// instead of offsets lets the grounding check verify it.
 export const citationSchema = z.object({
   chunk_id: z.string(),
-  quote_span: z.tuple([z.number().int(), z.number().int()]),
+  quote: z.string(),
 });
+export type Citation = z.infer<typeof citationSchema>;
 
+// Shape every multiple-choice item uses (spec: "Prompts and schemas").
 export const mcqSchema = z.object({
   kind: z.literal("mcq"),
   stem: z.string(),
@@ -20,6 +24,45 @@ export const mcqSchema = z.object({
 export type Mcq = z.infer<typeof mcqSchema>;
 
 export const practiceSetSchema = z.object({ questions: z.array(mcqSchema) });
+
+// One section of a unit guide. Every section carries its own citations and
+// gap_filled flag so grounding is checked per section.
+const grounded = { citations: z.array(citationSchema), gap_filled: z.boolean() };
+
+// The unit guide template (spec: "Guide"). Diagrams are a structured spec the
+// site renders, never generated images. Sections that don't fit a unit (e.g.
+// a formula in a unit without one) come back as null.
+export const guideSchema = z.object({
+  big_idea: z.object({ text: z.string(), ...grounded }),
+  objectives: z.array(z.object({ id: z.string(), text: z.string() })),
+  key_terms: z.array(z.object({ term: z.string(), definition: z.string(), ...grounded })),
+  compare: z
+    .object({ title: z.string(), headers: z.array(z.string()), rows: z.array(z.array(z.string())), ...grounded })
+    .nullable(),
+  diagram: z
+    .object({
+      type: z.enum(["flow", "cycle", "labeled_structure", "graph"]),
+      title: z.string(),
+      elements: z.array(z.object({ label: z.string(), detail: z.string() })),
+      connections: z.array(z.object({ from: z.string(), to: z.string(), label: z.string() })),
+      ...grounded,
+    })
+    .nullable(),
+  formula: z
+    .object({ latex: z.string(), interpretation: z.array(z.string()), ...grounded })
+    .nullable(),
+  worked_example: z.object({ prompt: z.string(), steps: z.array(z.string()), check: z.string(), ...grounded }),
+  exam_traps: z.array(z.object({ trap: z.string(), fix: z.string(), ...grounded })),
+  interview: z.object({ question: z.string(), model_answer: z.string(), follow_ups: z.array(z.string()), ...grounded }),
+  check_yourself: z.array(z.object({ q: z.string(), a: z.string(), ...grounded })),
+});
+export type Guide = z.infer<typeof guideSchema>;
+
+// Independent answer to a question shown without its key.
+export const resolveSchema = z.object({
+  working: z.string(),
+  answer_index: z.number().int(),
+});
 
 const BANNED_CHOICE = /\b(all|none) of the above\b/i;
 
