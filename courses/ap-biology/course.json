@@ -1,0 +1,93 @@
+{
+  "slug": "ap-biology",
+  "title": "AP® Biology",
+  "level": "High school, college-level course",
+  "subject": "Biology",
+  "alignment": "AP® Biology exam (unit order follows the usual course sequence; outline written in our own words)",
+  "source_mode": "materials_first",
+  "modules": {
+    "guide": "preview",
+    "cards": "preview",
+    "practice": "preview",
+    "frq": "pro",
+    "exam": "pro",
+    "formula": "free",
+    "cram": "pro",
+    "pdf": "pro"
+  },
+  "units": [
+    {
+      "position": 1,
+      "title": "Water, elements and the molecules of life",
+      "objectives": [
+        "Explain how hydrogen bonding gives water the properties living things depend on",
+        "Relate the structure of carbohydrates, lipids, proteins and nucleic acids to their jobs in cells",
+        "Describe how monomers join and split through dehydration and hydrolysis"
+      ]
+    },
+    {
+      "position": 2,
+      "title": "Cells: parts, membranes and transport",
+      "objectives": [
+        "Compare prokaryotic and eukaryotic cells and the roles of major organelles",
+        "Explain why surface area to volume ratio limits cell size",
+        "Predict the direction of water and solute movement across membranes, including by osmosis"
+      ]
+    },
+    {
+      "position": 3,
+      "title": "Enzymes and how cells capture and release energy",
+      "objectives": [
+        "Explain how enzymes lower activation energy and how temperature, pH and inhibitors change their rate",
+        "Trace energy and matter through photosynthesis",
+        "Trace energy and matter through cellular respiration and fermentation"
+      ]
+    },
+    {
+      "position": 4,
+      "title": "Cell signaling, feedback and the cell cycle",
+      "objectives": [
+        "Describe the steps of a signal transduction pathway",
+        "Distinguish positive and negative feedback with examples",
+        "Explain how checkpoints regulate the cell cycle and what happens when they fail"
+      ]
+    },
+    {
+      "position": 5,
+      "title": "Meiosis and inheritance",
+      "objectives": [
+        "Explain how meiosis and fertilization create genetic variation",
+        "Predict offspring ratios with Punnett squares and probability rules",
+        "Use a chi-square test to compare observed and expected results"
+      ]
+    },
+    {
+      "position": 6,
+      "title": "DNA, gene expression and biotechnology",
+      "objectives": [
+        "Describe DNA replication, transcription and translation",
+        "Explain how gene expression is regulated in prokaryotes and eukaryotes",
+        "Predict the effects of mutations, and describe common biotechnology methods such as PCR and gel electrophoresis"
+      ]
+    },
+    {
+      "position": 7,
+      "title": "Evolution and natural selection",
+      "objectives": [
+        "Explain how natural selection acts on variation in populations",
+        "Use the Hardy-Weinberg equations to test whether a population is evolving",
+        "Read phylogenetic trees and cladograms to infer relationships"
+      ]
+    },
+    {
+      "position": 8,
+      "title": "Ecology: populations, communities and ecosystems",
+      "objectives": [
+        "Model population growth with exponential and logistic equations",
+        "Trace energy flow and matter cycling through ecosystems",
+        "Predict how disruptions affect community structure and biodiversity"
+      ]
+    }
+  ],
+  "sources": []
+}

@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Study guide site
 
-## Getting Started
+A paid study-guide website: it takes payments, grants access, builds courses
+from uploaded materials, tracks progress, and generates flashcards and practice
+exams. The first course is AP® Biology.
 
-First, run the development server:
+The design follows the project's *Course Generation Pipeline — Technical Spec*
+and the *Stack and MVP plan* doc.
+
+## Stack
+
+| Layer | Choice |
+| --- | --- |
+| Web app | Next.js 16 (App Router, TypeScript), hosted on Vercel |
+| Database, auth, storage | Supabase (Postgres + pgvector) |
+| Background jobs | Trigger.dev |
+| AI | Claude API (draft and re-solve models in `src/lib/ai/models.ts`) |
+| Payments | Stripe Checkout, Billing, Customer Portal, Tax |
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local   # fill in keys
+npm run dev                  # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Database: create a Supabase project, then apply `supabase/migrations/` with the
+Supabase CLI (`supabase link` then `supabase db push`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Stripe: create two prices (monthly subscription, one-time semester pass), put
+their ids in `.env.local`, and forward webhooks locally with
+`stripe listen --forward-to localhost:3000/api/webhooks/stripe`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Jobs: `npm run trigger:dev` runs Trigger.dev tasks from `src/trigger/` locally.
 
-## Learn More
+## Checks
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run lint
+npm run typecheck
+npm test
+npm run build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+CI runs all four on every pull request.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Layout
 
-## Deploy on Vercel
+| Path | What it holds |
+| --- | --- |
+| `courses/<slug>/course.json` | Course outline and module tiers, written in our own words |
+| `supabase/migrations/` | Database schema (spec data model + progress tables) |
+| `src/lib/access.ts` | The paywall rule |
+| `src/lib/billing/` | Stripe client and Stripe → entitlement mapping |
+| `src/lib/ai/` | Claude models, item schemas and validation, drafting calls |
+| `src/trigger/` | Background tasks |
+| `src/app/api/` | Checkout and Stripe webhook routes |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Rules that apply to all work here
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **No College Board material in the pipeline.** The College Board does not permit
+  its content (course descriptions, released questions, practice exams) to be used
+  with generative AI. See `courses/ap-biology/README.md` for allowed sources.
+- **AP trademark.** Keep "AP" out of the brand name, domain and URLs. Title courses
+  "<Brand>'s Guide to AP® Biology". Every page carries the disclaimer in
+  `src/config/site.ts` (rendered by the footer).
+- **Paywall is server-side.** Pro content and answer keys never reach a browser
+  without an active entitlement. Only the Stripe webhook writes `entitlements`.
+- **13+ only.** Accounts require a confirmed age of 13 or older.
+
+## Status
+
+Phase 0–1 groundwork: schema, billing wiring, paywall rule, practice-question
+drafting and validation, and the AP Biology outline. Not built yet: ingest,
+owner dashboard, review queue, sign-in pages, flashcards and progress UI.
