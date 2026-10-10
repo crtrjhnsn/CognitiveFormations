@@ -9,7 +9,7 @@ const good: Mcq = {
   explanation: "Partial charges on O and H attract neighboring molecules.",
   difficulty: "easy",
   objective_ids: ["u1-o1"],
-  citations: [{ chunk_id: "c1", quote_span: [0, 40] }],
+  citations: [{ chunk_id: "c1", quote: "hydrogen bonds" }],
   gap_filled: false,
 };
 const chunks = new Set(["c1"]);
@@ -29,7 +29,7 @@ describe("validateMcq", () => {
     ]);
   });
   it("rejects citations outside the unit's sources", () => {
-    expect(validateMcq({ ...good, citations: [{ chunk_id: "c9", quote_span: [0, 1] }] }, chunks)).toEqual([
+    expect(validateMcq({ ...good, citations: [{ chunk_id: "c9", quote: "x" }] }, chunks)).toEqual([
       "citation c9 is not in this unit's sources",
     ]);
   });

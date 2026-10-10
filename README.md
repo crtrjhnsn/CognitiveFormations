@@ -34,6 +34,27 @@ their ids in `.env.local`, and forward webhooks locally with
 
 Jobs: `npm run trigger:dev` runs Trigger.dev tasks from `src/trigger/` locally.
 
+## Generating a course (phase 1 scripts)
+
+```bash
+npm run generate -- --course ap-biology --sources ./my-sources --units 1,2 --questions 5
+```
+
+The sources folder holds your files (PDF, DOCX, Markdown or text) and a
+`manifest.json` with the rights attestation and each file's role and license
+(format in `courses/ap-biology/README.md`). Needs `ANTHROPIC_API_KEY`.
+
+For each unit the script picks the most relevant source chunks, drafts the
+guide and practice questions, re-solves every question with a second model
+without the answer key, and checks every part for citations that really appear
+in the sources and for near-copies of the sources. Results go to
+`out/<course>/<timestamp>/`: one JSON file per unit with its flags, and
+`report.md` with the flag rate, token use and estimated cost.
+
+Options: `--mode materials_only` drops anything the sources don't support
+(default `materials_first` keeps it and flags it), `--concurrency` sets how
+many units run at once (default 4).
+
 ## Checks
 
 ```bash
@@ -53,7 +74,9 @@ CI runs all four on every pull request.
 | `supabase/migrations/` | Database schema (spec data model + progress tables) |
 | `src/lib/access.ts` | The paywall rule |
 | `src/lib/billing/` | Stripe client and Stripe → entitlement mapping |
-| `src/lib/ai/` | Claude models, item schemas and validation, drafting calls |
+| `src/lib/ai/` | Claude models, structured-call helper, item schemas and validation |
+| `src/pipeline/` | Ingest, chunking, retrieval, unit generation, checks and run report |
+| `scripts/` | Command-line entry points |
 | `src/trigger/` | Background tasks |
 | `src/app/api/` | Checkout and Stripe webhook routes |
 
@@ -71,6 +94,7 @@ CI runs all four on every pull request.
 
 ## Status
 
-Phase 0–1 groundwork: schema, billing wiring, paywall rule, practice-question
-drafting and validation, and the AP Biology outline. Not built yet: ingest,
-owner dashboard, review queue, sign-in pages, flashcards and progress UI.
+Phase 1: course generation runs as a script from a folder of source files.
+Not built yet: saving generated items to the database, owner dashboard, review
+queue, sign-in pages, flashcards and progress UI. Scanned PDFs (OCR) and PPTX
+files aren't supported yet.
