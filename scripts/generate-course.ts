@@ -19,6 +19,7 @@ const { values } = parseArgs({
     sources: { type: "string" },
     units: { type: "string" },
     questions: { type: "string", default: "5" },
+    cards: { type: "string", default: "12" },
     mode: { type: "string", default: "materials_first" },
     concurrency: { type: "string", default: "4" },
   },
@@ -27,7 +28,7 @@ const { values } = parseArgs({
 async function main() {
   const course = values.course && getCourse(values.course);
   if (!course || !values.sources) {
-    throw new Error("Usage: npm run generate -- --course <slug> --sources <folder> [--units 1,2] [--questions 5] [--mode materials_first|materials_only]");
+    throw new Error("Usage: npm run generate -- --course <slug> --sources <folder> [--units 1,2] [--questions 5] [--cards 12] [--mode materials_first|materials_only]");
   }
   if (values.mode !== "materials_first" && values.mode !== "materials_only") throw new Error(`Unknown --mode ${values.mode}`);
 
@@ -41,11 +42,12 @@ async function main() {
   const results = await runCourse(claudeLlm(createClient()), course, sources, {
     units: values.units?.split(",").map(Number),
     questionCount: Number(values.questions),
+    cardCount: Number(values.cards),
     sourceMode: values.mode,
     concurrency: Number(values.concurrency),
     onUnitDone: async (r) => {
       await writeFile(path.join(outDir, `unit-${r.unit.position}.json`), JSON.stringify(r, null, 2));
-      console.log(`Unit ${r.unit.position} done: ${r.guide.length} guide parts, ${r.practice.length} questions, ${r.failures.length} failures`);
+      console.log(`Unit ${r.unit.position} done: ${r.guide.length} guide parts, ${r.practice.length} questions, ${r.cards.length} flashcards, ${r.failures.length} failures`);
     },
   });
 

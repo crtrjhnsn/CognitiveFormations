@@ -43,7 +43,8 @@ describe.skipIf(!enabled)("published course and paywall (database)", () => {
 
   it("lists published units with what's in them", async () => {
     const course = await getPublishedCourse(db.sql, "ap-biology");
-    expect(course?.units).toEqual([expect.objectContaining({ position: 1, title: "Water", questions: 2 })]);
+    expect(course?.units).toEqual([expect.objectContaining({ position: 1, title: "Water", questions: 2, cards: 2 })]);
+    expect(course?.hasExam).toBe(true);
     expect(course?.units[0].guideParts).toBeGreaterThan(0);
   });
 
@@ -54,6 +55,8 @@ describe.skipIf(!enabled)("published course and paywall (database)", () => {
     expect(json).not.toContain("explanation");
     expect(json).not.toContain("citations");
     expect(json).not.toContain("gap_filled");
+    expect(json).not.toContain("A weak attraction"); // flashcards have their own page
+    expect(unit!.cards).toBe(2);
 
     const free = unit!.practice.find((i) => i.id === freeQuestion);
     const pro = unit!.practice.find((i) => i.id === proQuestion);

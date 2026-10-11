@@ -11,6 +11,7 @@ export interface PublishedUnit {
   objectives: string[];
   guideParts: number;
   questions: number;
+  cards: number;
 }
 
 export async function getPublishedCourse(sql: Sql, slug: string) {
@@ -20,13 +21,16 @@ export async function getPublishedCourse(sql: Sql, slug: string) {
   const units = await sql<PublishedUnit[]>`
     select u.position, u.title, u.objectives,
       count(i.id) filter (where i.kind = 'guide_section')::int as "guideParts",
-      count(i.id) filter (where i.kind = 'mcq')::int as questions
+      count(i.id) filter (where i.kind = 'mcq')::int as questions,
+      count(i.id) filter (where i.kind = 'card')::int as cards
     from units u
     left join items i on i.unit_id = u.id and i.status = 'approved'
       and exists (select 1 from modules m where m.id = i.module_id and m.enabled)
     where u.course_id = ${course.id}
     group by u.id order by u.position`;
-  return { ...course, units };
+  const [exam] = await sql<{ enabled: boolean }[]>`
+    select enabled from modules where course_id = ${course.id} and type = 'exam'`;
+  return { ...course, units, hasExam: Boolean(exam?.enabled) };
 }
 
 export type StudentItem =
@@ -73,11 +77,13 @@ export async function getPublishedUnit(sql: Sql, slug: string, position: number,
     select i.id, i.kind, i.tier, i.content from items i join modules m on m.id = i.module_id
     where i.unit_id = ${unit.id} and i.status = 'approved' and m.enabled
     order by i.kind desc, i.position`;
-  const presented = items.map((item) => presentItem(item, entitlement));
+  const presented = items.filter((item) => item.kind !== "card").map((item) => presentItem(item, entitlement));
   return {
     unit,
     guide: presented.filter((i) => i.kind === "guide_section"),
     practice: presented.filter((i) => i.kind === "mcq"),
+    // Flashcards are studied on their own page; the unit page only links there.
+    cards: items.filter((i) => i.kind === "card").length,
   };
 }
 

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { approve, approveUnit, publish, regenerate, unpublish } from "@/app/owner/actions";
 import { ActionButton } from "@/components/owner/ActionButton";
 import { FlagNote } from "@/components/owner/FlagNote";
-import { ItemContent, sectionLabel } from "@/components/owner/ItemContent";
+import { ItemContent, itemLabel } from "@/components/owner/ItemContent";
 import { TierSelect } from "@/components/owner/TierSelect";
 import { requireOwner } from "@/lib/auth/session";
 import { db } from "@/lib/db";
@@ -98,7 +98,7 @@ export default async function ReviewPage({ params, searchParams }: PageProps<"/o
             <li key={item.id} className="rounded border border-zinc-200 p-4">
               <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-500">
                 <span>Unit {item.unit_position}</span>
-                <span>{item.kind === "mcq" ? `Practice question ${item.position + 1}` : sectionLabel(item.content.section)}</span>
+                <span>{itemLabel(item)}</span>
                 <span>v{item.version}</span>
                 <span className={item.status === "approved" ? "text-green-700" : item.status === "flagged" ? "text-amber-700" : ""}>{item.status}</span>
                 {item.gap_filled && <span className="rounded bg-zinc-100 px-1">filled in beyond your files</span>}

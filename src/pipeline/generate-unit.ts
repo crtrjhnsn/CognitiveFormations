@@ -1,6 +1,6 @@
 import { CHECK_MODEL, DRAFT_MODEL } from "@/lib/ai/models";
 import { GenerationError, type Llm, type Usage } from "@/lib/ai/llm";
-import { guideSchema, practiceSetSchema, resolveSchema, validateMcq, type Citation, type Guide, type Mcq } from "@/lib/ai/schemas";
+import { cardSetSchema, guideSchema, practiceSetSchema, resolveSchema, validateMcq, type Card, type Citation, type Guide, type Mcq } from "@/lib/ai/schemas";
 import type { Chunk } from "./chunk";
 import { checkGrounding, checkOverlap, type Flag, type ResolvedCitation } from "./checks";
 import { DRAFT_SYSTEM, RESOLVE_SYSTEM, unitContext } from "./prompts";
@@ -12,6 +12,8 @@ export interface UnitJob {
   // Every chunk from the course's sources, for the overlap check.
   allChunks: Chunk[];
   questionCount: number;
+  // Flashcards to draft; 0 or unset skips them.
+  cardCount?: number;
 }
 
 export interface GeneratedItem<T> {
@@ -23,7 +25,7 @@ export interface GeneratedItem<T> {
 
 export interface UsageRecord {
   model: string;
-  stage: "draft_guide" | "draft_practice" | "resolve";
+  stage: "draft_guide" | "draft_practice" | "draft_cards" | "resolve";
   usage: Usage;
 }
 
@@ -32,6 +34,7 @@ export interface UnitResult {
   packChunkIds: string[];
   guide: GeneratedItem<unknown>[];
   practice: GeneratedItem<Mcq>[];
+  cards: GeneratedItem<Card>[];
   // Items left out entirely ("only my materials" mode drops gap-filled items).
   dropped: { section: string; reason: string }[];
   // Steps that failed outright; each becomes a schema_retry_failed flag at review.
@@ -71,6 +74,7 @@ export async function generateUnit(llm: Llm, job: UnitJob): Promise<UnitResult> 
     packChunkIds: job.pack.map((c) => c.id),
     guide: [],
     practice: [],
+    cards: [],
     dropped: [],
     failures: [],
     usage: [],
@@ -142,6 +146,33 @@ export async function generateUnit(llm: Llm, job: UnitJob): Promise<UnitResult> 
     result.practice.push(item);
   }
 
+  // 4. Flashcards, drafted from the guide so they use its terms.
+  if (job.cardCount) {
+    try {
+      const res = await llm({
+        model: DRAFT_MODEL,
+        effort: "medium",
+        system: DRAFT_SYSTEM,
+        context,
+        task: `Write ${job.cardCount} flashcards for this unit: a short prompt on the front (a term, process or "why" question) and a one- or two-sentence answer on the back. Cover every objective; don't repeat a card.${
+          guide ? `\n\nMatch the terms and notation of this unit's guide:\n${JSON.stringify(guide)}` : ""
+        }`,
+        schema: cardSetSchema,
+      });
+      result.usage.push({ model: res.servedBy, stage: "draft_cards", usage: res.usage });
+      for (const [index, card] of res.output.cards.entries()) {
+        const section = `cards[${index}]`;
+        if (onlyMaterials && card.gap_filled) {
+          result.dropped.push({ section, reason: "gap-filled in only-my-materials mode" });
+          continue;
+        }
+        result.cards.push(reviewPart(section, card, job, packById));
+      }
+    } catch (error) {
+      result.failures.push({ stage: "draft_cards", message: errorMessage(error) });
+    }
+  }
+
   return result;
 }
 
@@ -152,7 +183,7 @@ export async function regenerateQuestion(
   job: Omit<UnitJob, "questionCount">,
   previous: Mcq,
 ): Promise<{ item: GeneratedItem<Mcq> | null; failure: string | null; usage: UsageRecord[] }> {
-  const result: UnitResult = { unit: job.unit, packChunkIds: [], guide: [], practice: [], dropped: [], failures: [], usage: [] };
+  const result: UnitResult = { unit: job.unit, packChunkIds: [], guide: [], practice: [], cards: [], dropped: [], failures: [], usage: [] };
   const unitJob = { ...job, questionCount: 1 };
   const packById = new Map(job.pack.map((c) => [c.id, c]));
   const chunkIds = new Set(packById.keys());

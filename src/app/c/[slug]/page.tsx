@@ -49,10 +49,28 @@ async function Units({ slug }: { slug: string }) {
   await connection();
   const published = await getPublishedCourse(db(), slug);
   const config = getCourse(slug)!;
-  const units = published?.units ?? config.units.map((u) => ({ ...u, guideParts: 0, questions: 0 }));
+  const units = published?.units ?? config.units.map((u) => ({ ...u, guideParts: 0, questions: 0, cards: 0 }));
+  const cardCount = units.reduce((n, u) => n + u.cards, 0);
   return (
     <>
       {!published && <p className="mt-6 rounded bg-zinc-50 p-3 text-sm text-zinc-700">This guide is being written. Here&apos;s what it will cover.</p>}
+      {published && (cardCount > 0 || published.hasExam) && (
+        <nav className="mt-6 flex flex-wrap gap-2 text-sm">
+          {cardCount > 0 && (
+            <Link href={`/c/${slug}/cards`} className="rounded border border-zinc-300 px-3 py-1.5 hover:bg-zinc-50">
+              Flashcards ({cardCount})
+            </Link>
+          )}
+          {published.hasExam && (
+            <Link href={`/c/${slug}/exam`} className="rounded border border-zinc-300 px-3 py-1.5 hover:bg-zinc-50">
+              Practice exam
+            </Link>
+          )}
+          <Link href={`/c/${slug}/progress`} className="rounded border border-zinc-300 px-3 py-1.5 hover:bg-zinc-50">
+            Your progress
+          </Link>
+        </nav>
+      )}
       <ol className="mt-8 space-y-6">
         {units.map((unit) => {
           const ready = unit.guideParts + unit.questions > 0;
@@ -72,6 +90,7 @@ async function Units({ slug }: { slug: string }) {
               {ready && (
                 <p className="text-xs text-zinc-500">
                   Study guide{unit.questions > 0 && ` · ${unit.questions} practice questions`}
+                  {unit.cards > 0 && ` · ${unit.cards} flashcards`}
                 </p>
               )}
               <ul className="mt-2 list-disc pl-5 text-sm text-zinc-600">
