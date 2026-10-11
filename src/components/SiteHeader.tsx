@@ -23,8 +23,9 @@ async function AccountLink() {
   const user = await getSessionUser().catch(() => null);
   if (!user) return <Link href="/sign-in" className="text-zinc-600 hover:text-zinc-900">Sign in</Link>;
   return (
-    <Link href={user.role === "owner" ? "/owner" : "/account"} className="text-zinc-600 hover:text-zinc-900">
-      {user.role === "owner" ? "Owner" : "Account"}
-    </Link>
+    <>
+      {user.role === "owner" && <Link href="/owner" className="text-zinc-600 hover:text-zinc-900">Owner</Link>}
+      <Link href="/account" className="text-zinc-600 hover:text-zinc-900">Account</Link>
+    </>
   );
 }
