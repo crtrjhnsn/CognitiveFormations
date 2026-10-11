@@ -92,6 +92,15 @@ access setting in "Practice exams" (Preview counts as Pro, since an exam spans u
 `/c/<slug>/progress` shows each unit's practice results (latest answer per
 question) and how many flashcards have been studied.
 
+## Error monitoring
+
+Server and browser errors go to Sentry once `SENTRY_DSN` and
+`NEXT_PUBLIC_SENTRY_DSN` are set (both are the project's DSN; the second
+takes effect on the next deploy). Without them nothing is sent. Reports hold
+the error and the page it happened on, never cookies, headers, request
+bodies, query strings or who the user was (`src/config/monitoring.ts`).
+Background jobs report failures in the Trigger.dev dashboard.
+
 ## Generating a course (phase 1 scripts)
 
 ```bash

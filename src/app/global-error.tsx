@@ -1,10 +1,18 @@
 "use client";
 
+import * as Sentry from "@sentry/nextjs";
+import { useEffect } from "react";
 import "./globals.css";
 
 // Last-resort page for errors in the root layout itself. It replaces the
 // whole document, so it brings its own <html>, <body> and styles.
 export default function GlobalError({ error, retry }: { error: Error & { digest?: string }; retry: () => void }) {
+  // Server errors are reported where they happen and arrive here with only a
+  // digest; report the ones that happened in the browser.
+  useEffect(() => {
+    if (!error.digest) Sentry.captureException(error);
+  }, [error]);
+
   return (
     <html lang="en">
       <body className="bg-white font-sans text-zinc-900">

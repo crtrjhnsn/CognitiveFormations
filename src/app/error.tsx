@@ -1,10 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import * as Sentry from "@sentry/nextjs";
+import { useEffect } from "react";
 
 // Shown in place of a page that failed on the server or in the browser. In
 // production the error carries only a digest, which matches the server log.
 export default function ErrorPage({ error, retry }: { error: Error & { digest?: string }; retry: () => void }) {
+  // Server errors are reported where they happen and arrive here with only a
+  // digest; report the ones that happened in the browser.
+  useEffect(() => {
+    if (!error.digest) Sentry.captureException(error);
+  }, [error]);
+
   return (
     <main className="mx-auto w-full max-w-xl px-6 py-16">
       <h1 className="text-2xl font-semibold">Something went wrong</h1>
