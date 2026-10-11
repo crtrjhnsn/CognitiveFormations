@@ -2,7 +2,10 @@
 
 A paid study-guide website: it takes payments, grants access, builds courses
 from uploaded materials, tracks progress, and generates flashcards and practice
-exams. The first course is AP® Biology.
+exams. The first course is AP® Biology. Outlines for AP® Psychology, AP® U.S.
+History and AP® Calculus AB are ready too; each needs the owner's source
+notes before it can be generated. Their pages say the guide is being written
+until a course is published.
 
 The design follows the project's *Course Generation Pipeline — Technical Spec*
 and the *Stack and MVP plan* doc.
@@ -91,6 +94,15 @@ visit and scores them on the server; it follows the Practice exam module's
 access setting in "Practice exams" (Preview counts as Pro, since an exam spans units).
 `/c/<slug>/progress` shows each unit's practice results (latest answer per
 question) and how many flashcards have been studied.
+
+## Error monitoring
+
+Server and browser errors go to Sentry once `SENTRY_DSN` and
+`NEXT_PUBLIC_SENTRY_DSN` are set (both are the project's DSN; the second
+takes effect on the next deploy). Without them nothing is sent. Reports hold
+the error and the page it happened on, never cookies, headers, request
+bodies, query strings or who the user was (`src/config/monitoring.ts`).
+Background jobs report failures in the Trigger.dev dashboard.
 
 ## Generating a course (phase 1 scripts)
 

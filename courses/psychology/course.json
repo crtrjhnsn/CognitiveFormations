@@ -1,0 +1,80 @@
+{
+  "slug": "psychology",
+  "title": "AP® Psychology",
+  "level": "High school, college-level course",
+  "subject": "Psychology",
+  "alignment": "AP® Psychology exam (unit order follows the usual course sequence; outline written in our own words)",
+  "source_mode": "materials_first",
+  "modules": {
+    "guide": "preview",
+    "cards": "preview",
+    "practice": "preview",
+    "frq": "pro",
+    "exam": "pro",
+    "formula": "free",
+    "cram": "pro",
+    "pdf": "pro"
+  },
+  "units": [
+    {
+      "position": 1,
+      "title": "How psychologists study behavior",
+      "objectives": [
+        "Choose between experiments, correlational studies, surveys and case studies for a research question",
+        "Identify independent and dependent variables, controls and possible confounds in a study",
+        "Interpret means, standard deviations, correlation coefficients and statistical significance",
+        "Explain the ethical rules that protect people and animals in research"
+      ]
+    },
+    {
+      "position": 2,
+      "title": "The brain, the nervous system and the senses",
+      "objectives": [
+        "Describe how neurons fire and how neurotransmitters and drugs change communication between them",
+        "Match major brain regions and the endocrine system to the behaviors they support",
+        "Explain how heredity and environment interact to shape behavior",
+        "Describe the stages of sleep, common sleep disorders, and how the senses turn energy into neural signals"
+      ]
+    },
+    {
+      "position": 3,
+      "title": "Perception, memory and thinking",
+      "objectives": [
+        "Explain how attention, expectations and context shape what we perceive",
+        "Trace information through encoding, storage and retrieval, and explain why we forget",
+        "Compare problem-solving strategies and the biases that lead judgments astray",
+        "Evaluate how intelligence is defined and measured, including test reliability and validity"
+      ]
+    },
+    {
+      "position": 4,
+      "title": "Development and learning",
+      "objectives": [
+        "Describe physical, cognitive and social development from infancy through old age",
+        "Compare major theories of cognitive and moral development",
+        "Explain classical and operant conditioning and predict the effects of reinforcement schedules",
+        "Describe how people learn by observing others"
+      ]
+    },
+    {
+      "position": 5,
+      "title": "Social behavior, motivation and personality",
+      "objectives": [
+        "Explain how people explain others' behavior and the errors they make in doing so",
+        "Describe how groups, roles and authority influence conformity, obedience and helping",
+        "Compare theories of motivation and emotion",
+        "Compare psychodynamic, humanistic, trait and social-cognitive views of personality"
+      ]
+    },
+    {
+      "position": 6,
+      "title": "Mental and physical health",
+      "objectives": [
+        "Explain how stress affects health and which coping strategies help",
+        "Describe the main categories of psychological disorders and how they are diagnosed",
+        "Compare psychological and biomedical treatments and the evidence for each"
+      ]
+    }
+  ],
+  "sources": []
+}

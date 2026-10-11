@@ -1,3 +1,4 @@
+import { hasActiveEntitlement, type Entitlement } from "@/lib/access";
 import { getSessionUser } from "@/lib/auth/session";
 import { priceEnv } from "@/lib/billing/plans";
 import { stripe } from "@/lib/billing/stripe";
@@ -19,6 +20,12 @@ export async function POST(request: Request) {
   if (!user) return new Response("Sign in first", { status: 401 });
   const [profile] = await db()<{ confirmed_13_plus: boolean }[]>`select confirmed_13_plus from profiles where id = ${user.id}`;
   if (!profile?.confirmed_13_plus) return new Response("Accounts are for ages 13 and up", { status: 403 });
+  // One plan at a time, so nobody pays twice for the same access.
+  const [current] = await db()<{ status: Entitlement["status"]; current_period_end: Date }[]>`
+    select status, current_period_end from entitlements where user_id = ${user.id}`;
+  if (current && hasActiveEntitlement({ status: current.status, currentPeriodEnd: current.current_period_end })) {
+    return new Response("You already have Pro. You can manage it from your account page.", { status: 409 });
+  }
 
   const forParent = payer === "parent";
   const mode = MODES[plan];

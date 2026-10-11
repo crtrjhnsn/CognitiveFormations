@@ -1,0 +1,94 @@
+{
+  "slug": "calculus-ab",
+  "title": "AP® Calculus AB",
+  "level": "High school, college-level course",
+  "subject": "Mathematics",
+  "alignment": "AP® Calculus AB exam (unit order follows the usual course sequence; outline written in our own words)",
+  "source_mode": "materials_first",
+  "modules": {
+    "guide": "preview",
+    "cards": "preview",
+    "practice": "preview",
+    "frq": "pro",
+    "exam": "pro",
+    "formula": "free",
+    "cram": "pro",
+    "pdf": "pro"
+  },
+  "units": [
+    {
+      "position": 1,
+      "title": "Limits and continuity",
+      "objectives": [
+        "Estimate limits from graphs and tables, and find them with algebra",
+        "Use the squeeze theorem and limits at infinity to describe function behavior",
+        "Decide whether a function is continuous and apply the intermediate value theorem"
+      ]
+    },
+    {
+      "position": 2,
+      "title": "What a derivative is",
+      "objectives": [
+        "Interpret the derivative as a rate of change and as the slope of a tangent line",
+        "Find derivatives from the limit definition",
+        "Apply the power, product, quotient and trigonometric derivative rules"
+      ]
+    },
+    {
+      "position": 3,
+      "title": "Chain rule, implicit and inverse derivatives",
+      "objectives": [
+        "Differentiate compositions with the chain rule",
+        "Use implicit differentiation to find slopes on curves",
+        "Differentiate inverse functions, including inverse trigonometric functions, and find higher-order derivatives"
+      ]
+    },
+    {
+      "position": 4,
+      "title": "Derivatives in context",
+      "objectives": [
+        "Interpret derivatives in applied settings, including position, velocity and acceleration",
+        "Solve related rates problems",
+        "Approximate values with local linearization and evaluate limits with L'Hôpital's rule"
+      ]
+    },
+    {
+      "position": 5,
+      "title": "Analyzing functions with derivatives",
+      "objectives": [
+        "Apply the mean value theorem and the extreme value theorem",
+        "Use the first and second derivatives to find extrema, intervals of increase and concavity",
+        "Sketch and connect the graphs of a function and its derivatives",
+        "Solve optimization problems"
+      ]
+    },
+    {
+      "position": 6,
+      "title": "Integrals and the Fundamental Theorem",
+      "objectives": [
+        "Approximate accumulated change with Riemann and trapezoidal sums",
+        "Use the Fundamental Theorem of Calculus to connect derivatives and integrals",
+        "Find antiderivatives with basic rules and substitution, and evaluate definite integrals"
+      ]
+    },
+    {
+      "position": 7,
+      "title": "Differential equations",
+      "objectives": [
+        "Verify solutions to differential equations and sketch slope fields",
+        "Solve separable differential equations with initial conditions",
+        "Model exponential growth and decay with differential equations"
+      ]
+    },
+    {
+      "position": 8,
+      "title": "Applications of integration",
+      "objectives": [
+        "Find the average value of a function and net change from a rate",
+        "Use integrals to find displacement and distance traveled",
+        "Find areas between curves and volumes with cross sections, disks and washers"
+      ]
+    }
+  ],
+  "sources": []
+}
