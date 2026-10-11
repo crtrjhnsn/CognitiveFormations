@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import type { Llm, StructuredRequest } from "@/lib/ai/llm";
-import type { Guide, Mcq } from "@/lib/ai/schemas";
+import type { Llm } from "@/lib/ai/llm";
 import { CHECK_MODEL } from "@/lib/ai/models";
 import type { Chunk } from "@/pipeline/chunk";
 import { generateUnit, type UnitJob } from "@/pipeline/generate-unit";
 import { summarize } from "@/pipeline/report";
+import { fakeLlm, question } from "./fixtures";
 
 const chunk: Chunk = {
   id: "c1",
@@ -14,53 +14,6 @@ const chunk: Chunk = {
   text: "Hydrogen bonds hold neighboring water molecules together. Water is polar.",
   tokenCount: 20,
 };
-const cite = { citations: [{ chunk_id: "c1", quote: "Water is polar" }], gap_filled: false };
-
-const guide: Guide = {
-  big_idea: { text: "Water's polarity shapes life.", ...cite },
-  objectives: [{ id: "u1-o1", text: "Explain hydrogen bonding" }],
-  key_terms: [
-    { term: "Polar", definition: "Uneven charge.", ...cite },
-    { term: "Cohesion", definition: "Water sticks to water.", citations: [], gap_filled: true },
-  ],
-  compare: null,
-  diagram: null,
-  formula: null,
-  worked_example: { prompt: "Why does ice float?", steps: ["Hydrogen bonds space molecules apart."], check: "Less dense.", ...cite },
-  exam_traps: [{ trap: "Confusing covalent and hydrogen bonds", fix: "Hydrogen bonds are between molecules.", ...cite }],
-  interview: { question: "Why is water a good solvent?", model_answer: "It is polar.", follow_ups: [], ...cite },
-  check_yourself: [{ q: "Is water polar?", a: "Yes.", ...cite }],
-};
-
-const question = (overrides: Partial<Mcq>): Mcq => ({
-  kind: "mcq",
-  stem: "Which bond holds neighboring water molecules together?",
-  choices: ["Hydrogen bond", "Ionic bond", "Peptide bond", "Glycosidic bond"],
-  answer_index: 0,
-  explanation: "Partial charges attract.",
-  difficulty: "easy",
-  objective_ids: ["u1-o1"],
-  ...cite,
-  ...overrides,
-});
-
-// Fake Claude: returns canned output by schema, and records each request.
-function fakeLlm(practiceAttempts: Mcq[][], resolvedIndex: (stem: string) => number) {
-  const calls: StructuredRequest<never>[] = [];
-  let practiceCall = 0;
-  const llm: Llm = async (req) => {
-    calls.push(req as never);
-    const usage = { inputTokens: 1000, outputTokens: 500, cacheReadTokens: 0, cacheWriteTokens: 0 };
-    const shape = Object.keys((req.schema as unknown as { shape: object }).shape);
-    let output: unknown;
-    if (shape.includes("big_idea")) output = guide;
-    else if (shape.includes("questions")) output = { questions: practiceAttempts[Math.min(practiceCall++, practiceAttempts.length - 1)] };
-    else output = { working: "...", answer_index: resolvedIndex(req.task) };
-    return { output: output as never, usage, servedBy: req.model };
-  };
-  return { llm, calls };
-}
-
 const job: UnitJob = {
   course: { title: "AP® Biology", level: "High school", alignment: "AP® Biology exam", sourceMode: "materials_first" },
   unit: { position: 1, title: "Water", objectives: ["Explain hydrogen bonding"] },

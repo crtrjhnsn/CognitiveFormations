@@ -11,23 +11,29 @@ export interface ExtractedPage {
 export const SUPPORTED_EXTENSIONS = [".pdf", ".docx", ".md", ".txt"] as const;
 
 export async function extractText(filePath: string): Promise<ExtractedPage[]> {
-  const ext = path.extname(filePath).toLowerCase();
+  return extractPages(path.basename(filePath), new Uint8Array(await readFile(filePath)));
+}
+
+// Extracts text by file type, chosen from the filename's extension.
+export async function extractPages(filename: string, bytes: Uint8Array): Promise<ExtractedPage[]> {
+  const ext = path.extname(filename).toLowerCase();
   switch (ext) {
     case ".md":
     case ".txt":
-      return [{ page: null, text: await readFile(filePath, "utf8") }];
+      return [{ page: null, text: new TextDecoder().decode(bytes) }];
     case ".docx": {
       const mammoth = await import("mammoth");
-      const { value } = await mammoth.extractRawText({ path: filePath });
+      const { value } = await mammoth.extractRawText({ buffer: Buffer.from(bytes) });
       return [{ page: null, text: value }];
     }
     case ".pdf": {
       const { extractText: extractPdf, getDocumentProxy } = await import("unpdf");
-      const pdf = await getDocumentProxy(new Uint8Array(await readFile(filePath)));
+      // unpdf takes ownership of the buffer, so give it a copy.
+      const pdf = await getDocumentProxy(new Uint8Array(bytes));
       const { text } = await extractPdf(pdf, { mergePages: false });
       return text.map((pageText, i) => ({ page: i + 1, text: pageText }));
     }
     default:
-      throw new Error(`Unsupported file type ${ext} (${path.basename(filePath)}); supported: ${SUPPORTED_EXTENSIONS.join(", ")}`);
+      throw new Error(`Unsupported file type ${ext || "(none)"} for ${filename}; supported: ${SUPPORTED_EXTENSIONS.join(", ")}`);
   }
 }
