@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import { sendSignInLink, type SignInState } from "./actions";
 
@@ -17,6 +18,9 @@ export function SignInForm({ next }: { next: string }) {
       <button disabled={pending} className="rounded bg-zinc-900 px-4 py-2 text-white disabled:opacity-50">
         {pending ? "Sending…" : "Email me a sign-in link"}
       </button>
+      <p className="text-sm text-zinc-600">
+        New here? <Link href={`/sign-up?next=${encodeURIComponent(next)}`} className="underline">Create an account</Link>
+      </p>
     </form>
   );
 }

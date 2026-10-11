@@ -1,7 +1,4 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { recordAttestation, saveOutline, seedCourseFromConfig } from "@/lib/owner/courses";
-import { ingestFile, registerFile } from "@/lib/owner/files";
-import { runGenerationJob, startJob } from "@/lib/owner/jobs";
 import {
   approveItem,
   approveUnitDrafts,
@@ -18,13 +15,9 @@ import {
 } from "@/lib/owner/review";
 import { fakeLlm, question } from "../fixtures";
 import { createTestDatabase, createUser } from "./harness";
+import { COPIED, seedGeneratedCourse } from "./seed";
 
 const enabled = Boolean(process.env.TEST_DATABASE_URL);
-
-const COPIED = "Surface tension lets some insects walk across a pond because hydrogen bonds pull surface water molecules inward and together";
-const notes = new TextEncoder().encode(
-  `# Water\n\nHydrogen bonds hold neighboring water molecules together. Water is polar. ${COPIED}.\n`,
-);
 
 describe.skipIf(!enabled)("review queue (database)", () => {
   let db: Awaited<ReturnType<typeof createTestDatabase>>;
@@ -36,16 +29,7 @@ describe.skipIf(!enabled)("review queue (database)", () => {
     db = await createTestDatabase();
     owner = await createUser(db.sql, "owner@example.com");
     other = await createUser(db.sql, "other@example.com");
-    courseId = await seedCourseFromConfig(db.sql, owner, "ap-biology");
-    await saveOutline(db.sql, owner, courseId, [{ title: "Water", objectives: ["Explain hydrogen bonding"] }]);
-    const fileId = await registerFile(db.sql, owner, courseId, {
-      storageKey: `${courseId}/notes.md`, filename: "notes.md", mime: "text/markdown", role: "own_notes", license: "own", bytes: notes,
-    });
-    await ingestFile(db.sql, fileId!, notes);
-    await recordAttestation(db.sql, owner, courseId, null);
-    const jobId = await startJob(db.sql, owner, courseId);
-    const wrongKey = question({ stem: "Which property makes water a good solvent?", answer_index: 2 });
-    await runGenerationJob(db.sql, fakeLlm([[question({}), wrongKey]], () => 0).llm, jobId, { questionCount: 2 });
+    courseId = await seedGeneratedCourse(db.sql, owner);
   });
   afterAll(async () => {
     await db?.drop();
