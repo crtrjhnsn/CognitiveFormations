@@ -1,0 +1,108 @@
+{
+  "slug": "us-history",
+  "title": "AP® U.S. History",
+  "level": "High school, college-level course",
+  "subject": "History",
+  "alignment": "AP® United States History exam (unit order follows the usual course sequence; outline written in our own words)",
+  "source_mode": "materials_first",
+  "modules": {
+    "guide": "preview",
+    "cards": "preview",
+    "practice": "preview",
+    "frq": "pro",
+    "exam": "pro",
+    "formula": "free",
+    "cram": "pro",
+    "pdf": "pro"
+  },
+  "units": [
+    {
+      "position": 1,
+      "title": "Peoples of the Americas and first contacts, 1491–1607",
+      "objectives": [
+        "Describe how Native American societies adapted to their environments before European contact",
+        "Explain the causes of European exploration and the effects of the Columbian Exchange",
+        "Compare Spanish, French and English goals and their dealings with Native peoples and Africans"
+      ]
+    },
+    {
+      "position": 2,
+      "title": "Colonial societies, 1607–1754",
+      "objectives": [
+        "Compare the economies, labor systems and religious life of the New England, Middle, Chesapeake and Southern colonies",
+        "Explain how slavery grew in the colonies and how enslaved people resisted it",
+        "Describe how trade and imperial policy tied the colonies to Britain"
+      ]
+    },
+    {
+      "position": 3,
+      "title": "Revolution and a new republic, 1754–1800",
+      "objectives": [
+        "Explain how the Seven Years' War and new British policies led to colonial resistance",
+        "Trace the ideas and events of the Revolution and the war for independence",
+        "Compare the Articles of Confederation with the Constitution and the debates over ratification",
+        "Describe the first party conflicts and foreign policy challenges of the new nation"
+      ]
+    },
+    {
+      "position": 4,
+      "title": "Democracy, markets and reform, 1800–1848",
+      "objectives": [
+        "Explain how voting rights and political parties changed in the early nineteenth century",
+        "Describe how the market revolution changed work, transportation and regional economies",
+        "Assess the goals and results of religious revival and reform movements, including abolition",
+        "Explain how removal policies affected Native American nations"
+      ]
+    },
+    {
+      "position": 5,
+      "title": "Expansion, civil war and Reconstruction, 1844–1877",
+      "objectives": [
+        "Explain how westward expansion intensified the conflict over slavery",
+        "Trace the political failures that led to secession",
+        "Explain why the Union won the Civil War and how emancipation changed its aims",
+        "Evaluate what Reconstruction achieved and why it ended"
+      ]
+    },
+    {
+      "position": 6,
+      "title": "Industry, cities and the West, 1865–1898",
+      "objectives": [
+        "Explain how big business, railroads and new technology transformed the economy",
+        "Describe the experiences of immigrants and workers and how labor organized",
+        "Explain how settlement of the West affected Native Americans and the environment",
+        "Compare responses to industrial change, including populism and the Gilded Age debates"
+      ]
+    },
+    {
+      "position": 7,
+      "title": "Reform, empire, war and depression, 1890–1945",
+      "objectives": [
+        "Explain the goals and results of the Progressive movement",
+        "Explain why the United States expanded overseas and entered the First World War",
+        "Describe cultural change in the 1920s and the causes of the Great Depression",
+        "Evaluate the New Deal and the effects of the Second World War at home and abroad"
+      ]
+    },
+    {
+      "position": 8,
+      "title": "Cold War and a changing society, 1945–1980",
+      "objectives": [
+        "Explain the goals of containment and how the Cold War shaped domestic life",
+        "Trace the strategies and achievements of the civil rights movement",
+        "Explain the causes and effects of the Vietnam War and the protest movements of the era",
+        "Describe the growth of new conservative and liberal movements"
+      ]
+    },
+    {
+      "position": 9,
+      "title": "Recent America, 1980–present",
+      "objectives": [
+        "Explain the rise of modern conservatism and its effects on government",
+        "Describe how the end of the Cold War and later conflicts changed foreign policy",
+        "Explain how technology, globalization, migration and demographic change reshaped American life"
+      ]
+    }
+  ],
+  "sources": []
+}

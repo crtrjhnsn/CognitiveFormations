@@ -2,7 +2,10 @@
 
 A paid study-guide website: it takes payments, grants access, builds courses
 from uploaded materials, tracks progress, and generates flashcards and practice
-exams. The first course is AP® Biology.
+exams. The first course is AP® Biology. Outlines for AP® Psychology, AP® U.S.
+History and AP® Calculus AB are ready too; each needs the owner's source
+notes before it can be generated. Their pages say the guide is being written
+until a course is published.
 
 The design follows the project's *Course Generation Pipeline — Technical Spec*
 and the *Stack and MVP plan* doc.
