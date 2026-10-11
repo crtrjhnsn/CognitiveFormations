@@ -61,6 +61,21 @@ version. Clean items in a unit can be approved together. Each item's Free/Pro
 access can be changed. Publish is enabled once every item is approved and no
 flags are open.
 
+## Students and the paywall
+
+Students create an account at `/sign-up`. A neutral age screen asks for a
+date of birth (kept only as a yes/no "13 or older" on the profile) and turns
+away under-13s for a day. Published courses show at `/c/<slug>` and
+`/c/<slug>/<unit>`: free items for everyone, Pro items only with an active
+plan, checked on the server. Practice answers are checked by the server, so
+answer keys never reach the browser, and signed-in attempts are recorded.
+
+`/pricing` reads the two prices from Stripe and states the renewal terms
+next to each button. A student can pay or send a parent a 24-hour payment
+link; either way Pro goes to the student's account. `/account` shows the plan
+and opens Stripe's customer portal to change cards or cancel. Enable the
+customer portal (with cancellation) in the Stripe dashboard.
+
 ## Generating a course (phase 1 scripts)
 
 ```bash
@@ -126,10 +141,10 @@ locally, `npm run test:db` uses `postgres://postgres@localhost:5432/postgres`.
 
 ## Status
 
-Phase 3: owners sign in, upload sources, generate a course, review every item
-and publish. The phase 1 script still works for trying sources offline.
-Guide sections can be edited but not yet regenerated, and owners aren't
-emailed when generation finishes.
-Not built yet: student sign-up and paywall pages (what publishing makes
-visible), flashcards and progress UI. Scanned PDFs (OCR) and PPTX
+Phase 4: owners generate, review and publish courses; students sign up, read
+free sections, buy Pro (or have a parent pay) and answer practice questions.
+Guide sections can be edited but not yet regenerated, owners aren't emailed
+when generation finishes, and course pages render per request (no CDN
+caching yet).
+Not built yet: flashcards, practice exams and the progress UI. Scanned PDFs (OCR) and PPTX
 files aren't supported yet.

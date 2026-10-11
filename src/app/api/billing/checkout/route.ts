@@ -1,39 +1,40 @@
+import { getSessionUser } from "@/lib/auth/session";
+import { priceEnv } from "@/lib/billing/plans";
 import { stripe } from "@/lib/billing/stripe";
-import { createClient } from "@/lib/supabase/server";
+import { db } from "@/lib/db";
 import { requireEnv } from "@/lib/env";
 
-const PLANS = {
-  pro_monthly: { price: "STRIPE_PRICE_PRO_MONTHLY", mode: "subscription" },
-  pro_semester: { price: "STRIPE_PRICE_PRO_SEMESTER", mode: "payment" },
-} as const;
+const MODES = { pro_monthly: "subscription", pro_semester: "payment" } as const;
 
+// Starts Stripe Checkout for the signed-in student. With payer "parent" it
+// returns a link the student can send to a parent or guardian, who pays
+// with their own email and card; access still goes to the student.
 export async function POST(request: Request) {
-  const { plan } = (await request.json().catch(() => ({}))) as { plan?: string };
+  const { plan, payer } = (await request.json().catch(() => ({}))) as { plan?: string; payer?: string };
   if (plan !== "pro_monthly" && plan !== "pro_semester") {
     return new Response("Unknown plan", { status: 400 });
   }
 
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getSessionUser();
   if (!user) return new Response("Sign in first", { status: 401 });
-
-  const { data: profile } = await supabase.from("profiles").select("confirmed_13_plus").eq("id", user.id).single();
+  const [profile] = await db()<{ confirmed_13_plus: boolean }[]>`select confirmed_13_plus from profiles where id = ${user.id}`;
   if (!profile?.confirmed_13_plus) return new Response("Accounts are for ages 13 and up", { status: 403 });
 
-  const { price, mode } = PLANS[plan];
+  const forParent = payer === "parent";
+  const mode = MODES[plan];
   const siteUrl = requireEnv("NEXT_PUBLIC_SITE_URL");
   const session = await stripe().checkout.sessions.create({
     mode,
-    line_items: [{ price: requireEnv(price), quantity: 1 }],
+    line_items: [{ price: requireEnv(priceEnv(plan)), quantity: 1 }],
     client_reference_id: user.id,
-    customer_email: user.email,
+    ...(forParent || !user.email ? {} : { customer_email: user.email }),
     ...(mode === "subscription"
       ? { subscription_data: { metadata: { user_id: user.id } } }
       : { customer_creation: "always" as const }),
     automatic_tax: { enabled: true },
-    success_url: `${siteUrl}/account?checkout=success`,
+    success_url: forParent ? `${siteUrl}/pricing/thanks` : `${siteUrl}/account?checkout=success`,
     cancel_url: `${siteUrl}/pricing`,
   });
 
-  return Response.json({ url: session.url });
+  return Response.json({ url: session.url, expiresAt: session.expires_at });
 }

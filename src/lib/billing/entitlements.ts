@@ -11,6 +11,8 @@ export interface EntitlementRow {
   current_period_end: string;
   stripe_customer_id: string;
   stripe_subscription_id: string | null;
+  // Set when the student cancelled: Pro stays on until current_period_end.
+  cancel_at_period_end: boolean;
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -45,6 +47,7 @@ export function entitlementFromSubscription(subscription: Stripe.Subscription): 
     current_period_end: new Date(periodEnd * 1000).toISOString(),
     stripe_customer_id: customerId(subscription.customer),
     stripe_subscription_id: subscription.id,
+    cancel_at_period_end: subscription.cancel_at_period_end || subscription.cancel_at !== null,
   };
 }
 
@@ -59,5 +62,6 @@ export function entitlementFromSemesterPass(session: Stripe.Checkout.Session): E
     current_period_end: new Date(session.created * 1000 + SEMESTER_PASS_DAYS * DAY_MS).toISOString(),
     stripe_customer_id: customerId(session.customer),
     stripe_subscription_id: null,
+    cancel_at_period_end: false,
   };
 }

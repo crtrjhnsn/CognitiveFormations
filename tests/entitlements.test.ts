@@ -10,6 +10,8 @@ function subscription(overrides: Partial<Stripe.Subscription>): Stripe.Subscript
     status: "active",
     metadata: { user_id: "user-1" },
     items: { data: [{ current_period_end: 1_800_000_000 }] },
+    cancel_at_period_end: false,
+    cancel_at: null,
     ...overrides,
   } as unknown as Stripe.Subscription;
 }
@@ -23,7 +25,12 @@ describe("entitlementFromSubscription", () => {
       current_period_end: new Date(1_800_000_000 * 1000).toISOString(),
       stripe_customer_id: "cus_1",
       stripe_subscription_id: "sub_1",
+      cancel_at_period_end: false,
     });
+  });
+  it("keeps access to the period end after a cancellation", () => {
+    const row = entitlementFromSubscription(subscription({ cancel_at_period_end: true }));
+    expect(row).toMatchObject({ status: "active", cancel_at_period_end: true });
   });
   it("locks access when payment fails or the subscription ends", () => {
     expect(entitlementFromSubscription(subscription({ status: "past_due" })).status).toBe("past_due");
