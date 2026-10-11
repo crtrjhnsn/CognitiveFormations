@@ -20,6 +20,18 @@ import {
 } from "@/lib/owner/courses";
 import { deleteFile, FILE_ROLES, MAX_UPLOAD_BYTES, registerFile, type FileRole } from "@/lib/owner/files";
 import { cancelJob, JobRefused, retryJob, startJob } from "@/lib/owner/jobs";
+import {
+  approveItem,
+  approveUnitDrafts,
+  editItem,
+  publishCourse,
+  regenerateItem,
+  ReviewRefused,
+  rollbackItem,
+  setItemTier,
+  unpublishCourse,
+} from "@/lib/owner/review";
+import { claudeLlm, createClient as createClaudeClient } from "@/lib/ai/llm";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { generateCourseTask } from "@/trigger/generate-course";
 import type { ingestFileTask } from "@/trigger/ingest-file";
@@ -180,4 +192,70 @@ export async function cancel(jobId: string) {
   const user = await owner();
   await cancelJob(db(), user.id, jobId);
   refresh();
+}
+
+// --- Review queue ------------------------------------------------------------
+
+// Review refusals are messages for the owner; anything else is a bug.
+async function review(run: () => Promise<unknown>, message?: string): Promise<ActionResult> {
+  try {
+    await run();
+  } catch (err) {
+    if (err instanceof ReviewRefused) return { error: err.message };
+    throw err;
+  }
+  refresh();
+  return message ? { message } : {};
+}
+
+export async function approve(itemId: string) {
+  const user = await owner();
+  return review(() => approveItem(db(), user.id, itemId));
+}
+
+export async function approveUnit(courseId: string, unitPosition: number) {
+  const user = await owner();
+  let count = 0;
+  const result = await review(async () => {
+    count = await approveUnitDrafts(db(), user.id, courseId, unitPosition);
+  });
+  return result.error ? result : { message: `Approved ${count} item${count === 1 ? "" : "s"}.` };
+}
+
+export async function changeTier(itemId: string, tier: "free" | "pro") {
+  const user = await owner();
+  if (tier !== "free" && tier !== "pro") return { error: "Unknown tier" };
+  return review(() => setItemTier(db(), user.id, itemId, tier));
+}
+
+export async function saveEdit(itemId: string, changes: Record<string, unknown>): Promise<ActionResult> {
+  const user = await owner();
+  let flagged = false;
+  const result = await review(async () => {
+    flagged = (await editItem(db(), user.id, itemId, changes)).flagged;
+  });
+  if (result.error) return result;
+  return flagged
+    ? { error: "Saved, but it now copies a source too closely, so it's flagged. Reword it in your own words." }
+    : { message: "Saved and approved." };
+}
+
+export async function rollback(itemId: string, version: number) {
+  const user = await owner();
+  return review(() => rollbackItem(db(), user.id, itemId, version), `Restored version ${version}. Approve it when it looks right.`);
+}
+
+export async function regenerate(itemId: string) {
+  const user = await owner();
+  return review(() => regenerateItem(db(), claudeLlm(createClaudeClient()), user.id, itemId), "New question ready for review.");
+}
+
+export async function publish(courseId: string) {
+  const user = await owner();
+  return review(() => publishCourse(db(), user.id, courseId), "Published.");
+}
+
+export async function unpublish(courseId: string) {
+  const user = await owner();
+  return review(() => unpublishCourse(db(), user.id, courseId));
 }

@@ -58,6 +58,17 @@ export const guideSchema = z.object({
 });
 export type Guide = z.infer<typeof guideSchema>;
 
+// Schema for one stored guide part, named as guideParts() names it:
+// "big_idea", or "key_terms[2]" for one entry of a list section.
+export function guideSectionSchema(section: string): z.ZodType | null {
+  const match = /^([a-z_]+)(\[\d+\])?$/.exec(section);
+  if (!match || match[1] === "objectives" || !(match[1] in guideSchema.shape)) return null;
+  let schema: z.ZodType = guideSchema.shape[match[1] as keyof Guide];
+  if (schema instanceof z.ZodNullable) schema = schema.unwrap() as z.ZodType;
+  if (match[2]) return schema instanceof z.ZodArray ? (schema.element as z.ZodType) : null;
+  return schema instanceof z.ZodArray ? null : schema;
+}
+
 // Independent answer to a question shown without its key.
 export const resolveSchema = z.object({
   working: z.string(),

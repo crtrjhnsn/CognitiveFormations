@@ -51,6 +51,16 @@ Generation runs as a background job with one step per unit; the page shows
 progress and estimated cost, and failed units can be retried without redoing
 the rest. Generated items wait for review (flagged ones carry the reason).
 
+## Reviewing and publishing
+
+The course's Review page lists every generated item, flagged ones first, with
+what each check found and a suggested fix. Approve an item as is, edit it (an
+edit approves it, unless it now copies a source too closely), regenerate a
+practice question (redrafted and re-checked with Claude), or restore an earlier
+version. Clean items in a unit can be approved together. Each item's Free/Pro
+access can be changed. Publish is enabled once every item is approved and no
+flags are open.
+
 ## Generating a course (phase 1 scripts)
 
 ```bash
@@ -116,9 +126,10 @@ locally, `npm run test:db` uses `postgres://postgres@localhost:5432/postgres`.
 
 ## Status
 
-Phase 2: owners sign in, upload sources and generate a course from the owner
-pages; generated items are saved to the database. The phase 1 script still
-works for trying sources offline.
-Not built yet: review queue and publishing, student sign-up and paywall pages,
-flashcards and progress UI. Scanned PDFs (OCR) and PPTX
+Phase 3: owners sign in, upload sources, generate a course, review every item
+and publish. The phase 1 script still works for trying sources offline.
+Guide sections can be edited but not yet regenerated, and owners aren't
+emailed when generation finishes.
+Not built yet: student sign-up and paywall pages (what publishing makes
+visible), flashcards and progress UI. Scanned PDFs (OCR) and PPTX
 files aren't supported yet.
