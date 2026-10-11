@@ -69,6 +69,11 @@ export function guideSectionSchema(section: string): z.ZodType | null {
   return schema instanceof z.ZodArray ? null : schema;
 }
 
+// One flashcard: a prompt on the front, a short answer on the back.
+export const cardSchema = z.object({ front: z.string(), back: z.string(), ...grounded });
+export type Card = z.infer<typeof cardSchema>;
+export const cardSetSchema = z.object({ cards: z.array(cardSchema) });
+
 // Independent answer to a question shown without its key.
 export const resolveSchema = z.object({
   working: z.string(),

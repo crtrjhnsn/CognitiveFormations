@@ -7,6 +7,7 @@ import type { IngestedSources } from "./sources";
 export interface RunOptions {
   units?: number[];
   questionCount: number;
+  cardCount?: number;
   sourceMode: "materials_first" | "materials_only";
   // Spec: units run in parallel, capped per course.
   concurrency: number;
@@ -29,6 +30,7 @@ export async function runCourse(llm: Llm, course: CourseConfig, sources: Ingeste
         pack: buildContextPack(unit, sources.draftable),
         allChunks: sources.all,
         questionCount: options.questionCount,
+        cardCount: options.cardCount,
       });
       await options.onUnitDone?.(results[i]);
     }

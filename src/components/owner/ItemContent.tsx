@@ -20,12 +20,26 @@ export function sectionLabel(section: unknown): string {
   return SECTION_LABELS[key] ?? key;
 }
 
+export function itemLabel(item: { kind: string; position: number; content: Record<string, unknown> }): string {
+  if (item.kind === "mcq") return `Practice question ${item.position + 1}`;
+  if (item.kind === "card") return `Flashcard ${item.position + 1}`;
+  return sectionLabel(item.content.section);
+}
+
 const HIDDEN = new Set(["kind", "section", "citations", "gap_filled", "objective_ids"]);
 
 // Read-only rendering of an item's content as a student would see it, plus
 // the answer key.
 export function ItemContent({ item }: { item: Pick<ReviewItem, "kind" | "content"> }) {
   const c = item.content;
+  if (item.kind === "card") {
+    return (
+      <div className="grid gap-2 text-sm sm:grid-cols-2">
+        <p className="rounded bg-zinc-50 p-2 font-medium">{String(c.front)}</p>
+        <p className="rounded bg-zinc-50 p-2">{String(c.back)}</p>
+      </div>
+    );
+  }
   if (item.kind === "mcq") {
     const choices = (c.choices as string[]) ?? [];
     return (

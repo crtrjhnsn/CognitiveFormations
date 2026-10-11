@@ -53,6 +53,12 @@ async function Unit({ params }: Pick<PageProps<"/c/[slug]/[unit]">, "params">) {
         ))}
       </ul>
 
+      {data.cards > 0 && (
+        <Link href={`/c/${slug}/cards?unit=${unit.position}`} className="mt-4 inline-block rounded border border-zinc-300 px-3 py-1.5 text-sm hover:bg-zinc-50">
+          Study this unit&apos;s {data.cards} flashcards
+        </Link>
+      )}
+
       {guide.length > 0 && <GuideList items={guide} signedIn={signedIn} />}
 
       {practice.length > 0 && (

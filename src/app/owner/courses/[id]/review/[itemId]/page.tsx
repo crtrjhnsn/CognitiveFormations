@@ -4,7 +4,7 @@ import { rollback } from "@/app/owner/actions";
 import { ActionButton } from "@/components/owner/ActionButton";
 import { EditItemForm } from "@/components/owner/EditItemForm";
 import { FlagNote } from "@/components/owner/FlagNote";
-import { ItemContent, sectionLabel } from "@/components/owner/ItemContent";
+import { ItemContent, itemLabel } from "@/components/owner/ItemContent";
 import { requireOwner } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { getReviewItem } from "@/lib/owner/review";
@@ -26,7 +26,7 @@ export default async function EditItemPage({ params }: PageProps<"/owner/courses
       <div>
         <Link href={backHref} className="text-sm text-zinc-500 hover:underline">← Review</Link>
         <h1 className="mt-2 text-xl font-semibold">
-          Unit {item.unit_position}: {item.kind === "mcq" ? `practice question ${item.position + 1}` : sectionLabel(item.content.section)}
+          Unit {item.unit_position}: {itemLabel(item)}
         </h1>
         <p className="text-sm text-zinc-600">Version {item.version} · {item.status}</p>
       </div>

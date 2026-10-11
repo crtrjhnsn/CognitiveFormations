@@ -76,10 +76,26 @@ link; either way Pro goes to the student's account. `/account` shows the plan
 and opens Stripe's customer portal to change cards or cancel. Enable the
 customer portal (with cancellation) in the Stripe dashboard.
 
+## Flashcards, practice exams and progress
+
+Flashcards are generated with each unit (12 per unit when the Flashcards
+module is on) and go through the same citation and overlap checks and the
+same review queue as everything else. Courses generated before this need
+their units regenerated to get cards.
+
+`/c/<slug>/cards` runs a flashcard session for signed-in students: due cards
+first, then up to 10 new ones, scheduled per student with an SM-2 style
+algorithm (`src/lib/srs.ts`). `?unit=<n>` limits a session to one unit.
+`/c/<slug>/exam` draws up to 20 practice questions spread across units each
+visit and scores them on the server; it follows the Practice exam module's
+access setting in "Practice exams" (Preview counts as Pro, since an exam spans units).
+`/c/<slug>/progress` shows each unit's practice results (latest answer per
+question) and how many flashcards have been studied.
+
 ## Generating a course (phase 1 scripts)
 
 ```bash
-npm run generate -- --course ap-biology --sources ./my-sources --units 1,2 --questions 5
+npm run generate -- --course ap-biology --sources ./my-sources --units 1,2 --questions 5 --cards 12
 ```
 
 The sources folder holds your files (PDF, DOCX, Markdown or text) and a
@@ -141,10 +157,12 @@ locally, `npm run test:db` uses `postgres://postgres@localhost:5432/postgres`.
 
 ## Status
 
-Phase 4: owners generate, review and publish courses; students sign up, read
-free sections, buy Pro (or have a parent pay) and answer practice questions.
+Phase 5: owners generate, review and publish courses; students sign up, read
+free sections, buy Pro (or have a parent pay), answer practice questions,
+study flashcards, take practice exams and see their progress.
 Guide sections can be edited but not yet regenerated, owners aren't emailed
 when generation finishes, and course pages render per request (no CDN
 caching yet).
-Not built yet: flashcards, practice exams and the progress UI. Scanned PDFs (OCR) and PPTX
-files aren't supported yet.
+Flashcards can't be regenerated one at a time (edit them instead), and
+practice exams aren't timed. Scanned PDFs (OCR) and PPTX files aren't
+supported yet.

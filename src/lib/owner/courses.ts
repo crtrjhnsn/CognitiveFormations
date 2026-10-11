@@ -9,7 +9,7 @@ export const MODULE_TYPES = ["guide", "cards", "formula", "practice", "frq", "in
 export type ModuleType = (typeof MODULE_TYPES)[number];
 
 // Modules the generator drafts today; the rest arrive with later phases.
-export const GENERATED_MODULES: ModuleType[] = ["guide", "practice"];
+export const GENERATED_MODULES: ModuleType[] = ["guide", "practice", "cards"];
 
 export const ATTESTATION_TEXT_VERSION = "2026-10-11";
 export const ATTESTATION_TEXT =

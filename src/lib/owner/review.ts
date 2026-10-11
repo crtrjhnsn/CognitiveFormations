@@ -1,7 +1,7 @@
 import type postgres from "postgres";
 import type { Tier } from "@/lib/access";
 import type { Llm } from "@/lib/ai/llm";
-import { guideSectionSchema, mcqSchema, validateMcq, type Mcq } from "@/lib/ai/schemas";
+import { cardSchema, guideSectionSchema, mcqSchema, validateMcq, type Mcq } from "@/lib/ai/schemas";
 import type { Sql } from "@/lib/db";
 import { checkGrounding, checkOverlap } from "@/pipeline/checks";
 import { regenerateQuestion, visibleText } from "@/pipeline/generate-unit";
@@ -32,7 +32,7 @@ export interface ReviewCitation {
 
 export interface ReviewItem {
   id: string;
-  kind: "mcq" | "guide_section";
+  kind: "mcq" | "guide_section" | "card";
   module_type: string;
   position: number;
   content: Record<string, unknown>;
@@ -236,6 +236,12 @@ export function validateEdit(kind: string, current: Record<string, unknown>, cha
     const citationIds = new Set(parsed.data.citations.map((c) => c.chunk_id));
     const problems = validateMcq(parsed.data, citationIds);
     if (problems.length) throw new ReviewRefused(`Check the question: ${problems.join("; ")}`);
+    return parsed.data as Record<string, unknown>;
+  }
+  if (kind === "card") {
+    const parsed = cardSchema.safeParse(content);
+    if (!parsed.success) throw new ReviewRefused(`Check the card: ${parsed.error.issues[0]?.message ?? "invalid"}`);
+    if (!parsed.data.front.trim() || !parsed.data.back.trim()) throw new ReviewRefused("A card needs both a front and a back");
     return parsed.data as Record<string, unknown>;
   }
   const section = String(current.section ?? "");

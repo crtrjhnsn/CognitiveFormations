@@ -43,6 +43,13 @@ export function fakeLlm(practiceAttempts: Mcq[][], resolvedIndex: (stem: string)
     const shape = Object.keys((req.schema as unknown as { shape: object }).shape);
     let output: unknown;
     if (shape.includes("big_idea")) output = guide;
+    else if (shape.includes("cards"))
+      output = {
+        cards: [
+          { front: "Hydrogen bond", back: "A weak attraction between polar molecules.", ...cite },
+          { front: "Why is water polar?", back: "Oxygen pulls shared electrons more strongly.", ...cite },
+        ],
+      };
     else if (shape.includes("questions")) output = { questions: practiceAttempts[Math.min(practiceCall++, practiceAttempts.length - 1)] };
     else output = { working: "...", answer_index: resolvedIndex(req.task) };
     return { output: output as never, usage, servedBy: req.model };

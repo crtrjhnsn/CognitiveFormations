@@ -33,7 +33,7 @@ export function summarize(units: UnitResult[]): RunSummary {
     tokens: {},
   };
   for (const unit of units) {
-    for (const item of [...unit.guide, ...unit.practice]) {
+    for (const item of [...unit.guide, ...unit.practice, ...unit.cards]) {
       summary.items++;
       if (item.flags.length) summary.flaggedItems++;
       for (const flag of item.flags) summary.flagsByKind[flag.kind]++;
@@ -73,11 +73,11 @@ export function renderReport(courseTitle: string, units: UnitResult[]): string {
     "",
     "## Units",
     "",
-    "| Unit | Source chunks used | Guide parts | Questions | Flagged | Failures |",
-    "| --- | --- | --- | --- | --- | --- |",
+    "| Unit | Source chunks used | Guide parts | Questions | Flashcards | Flagged | Failures |",
+    "| --- | --- | --- | --- | --- | --- | --- |",
     ...units.map((u) => {
-      const items = [...u.guide, ...u.practice];
-      return `| ${u.unit.position}. ${u.unit.title} | ${u.packChunkIds.length} | ${u.guide.length} | ${u.practice.length} | ${
+      const items = [...u.guide, ...u.practice, ...u.cards];
+      return `| ${u.unit.position}. ${u.unit.title} | ${u.packChunkIds.length} | ${u.guide.length} | ${u.practice.length} | ${u.cards.length} | ${
         items.filter((i) => i.flags.length).length
       } | ${u.failures.map((f) => f.stage).join(", ") || "none"} |`;
     }),

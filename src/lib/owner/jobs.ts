@@ -123,7 +123,7 @@ export async function loadJobContext(sql: Sql, courseId: string): Promise<JobCon
 // Runs a job's queued steps, units in parallel up to `concurrency`. Each step
 // saves its own items in one transaction, so a crash or retry never leaves
 // half a unit or duplicates.
-export async function runGenerationJob(sql: Sql, llm: Llm, jobId: string, options: { concurrency?: number; questionCount?: number } = {}) {
+export async function runGenerationJob(sql: Sql, llm: Llm, jobId: string, options: { concurrency?: number; questionCount?: number; cardCount?: number } = {}) {
   const [job] = await sql<{ id: string; course_id: string; status: string }[]>`
     update generation_jobs set status = 'running', stage = 'generating', started_at = coalesce(started_at, now())
     where id = ${jobId} and status in ('queued', 'running') returning id, course_id, status`;
@@ -148,6 +148,7 @@ export async function runGenerationJob(sql: Sql, llm: Llm, jobId: string, option
           pack: buildContextPack(unit, ctx.draftable),
           allChunks: ctx.all,
           questionCount: options.questionCount ?? 5,
+          cardCount: ctx.modules.get("cards")?.enabled ? (options.cardCount ?? 12) : 0,
         });
         await saveUnitResult(sql, ctx, jobId, step, result);
       } catch (error) {
@@ -191,6 +192,7 @@ async function saveUnitResult(sql: Sql, ctx: JobContext, jobId: string, step: { 
     };
     await save("guide", "guide_section", result.guide);
     await save("practice", "mcq", result.practice);
+    await save("cards", "card", result.cards);
 
     const failed = result.failures.length > 0;
     await tx`update job_steps set status = ${failed ? "failed" : "succeeded"}, finished_at = now(),
