@@ -16,7 +16,7 @@ export async function createClient() {
             for (const { name, value, options } of toSet) cookieStore.set(name, value, options);
           } catch {
             // Called from a Server Component, where cookies are read-only.
-            // Session refresh belongs in the proxy, added with sign-in (phase 4).
+            // src/proxy.ts refreshes the session instead.
           }
         },
       },

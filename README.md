@@ -33,6 +33,23 @@ their ids in `.env.local`, and forward webhooks locally with
 `stripe listen --forward-to localhost:3000/api/webhooks/stripe`.
 
 Jobs: `npm run trigger:dev` runs Trigger.dev tasks from `src/trigger/` locally.
+Set `DATABASE_URL` and the Supabase keys in the Trigger.dev project's
+environment variables too, since the tasks read the database and storage.
+
+Owner access: `npm run make-owner -- you@example.com` creates the account if
+needed and makes it an owner. Then sign in at `/sign-in?next=/owner` with the
+emailed link. In Supabase, add `<site url>/auth/callback` to the allowed
+redirect URLs (Authentication > URL Configuration).
+
+## Setting up a course (owner pages)
+
+`/owner` lists courses and sets up new ones from `courses/<slug>/course.json`.
+Each course page has five steps: upload source files (they go straight to the
+private `sources` bucket and are read in the background), confirm the outline,
+choose modules and who sees them, confirm the rights statement, then generate.
+Generation runs as a background job with one step per unit; the page shows
+progress and estimated cost, and failed units can be retried without redoing
+the rest. Generated items wait for review (flagged ones carry the reason).
 
 ## Generating a course (phase 1 scripts)
 
@@ -64,7 +81,9 @@ npm test
 npm run build
 ```
 
-CI runs all four on every pull request.
+CI runs all four on every pull request. The database tests in `tests/db/` run
+when `TEST_DATABASE_URL` points at a Postgres with pgvector (CI starts one);
+locally, `npm run test:db` uses `postgres://postgres@localhost:5432/postgres`.
 
 ## Layout
 
@@ -78,7 +97,10 @@ CI runs all four on every pull request.
 | `src/pipeline/` | Ingest, chunking, retrieval, unit generation, checks and run report |
 | `scripts/` | Command-line entry points |
 | `src/trigger/` | Background tasks |
-| `src/app/api/` | Checkout and Stripe webhook routes |
+| `src/lib/owner/` | Course setup, uploads and generation jobs (database access) |
+| `src/lib/auth/` | Session and owner checks |
+| `src/app/owner/` | Owner pages and their server actions |
+| `src/app/api/` | Checkout, Stripe webhook and job progress routes |
 
 ## Rules that apply to all work here
 
@@ -94,7 +116,9 @@ CI runs all four on every pull request.
 
 ## Status
 
-Phase 1: course generation runs as a script from a folder of source files.
-Not built yet: saving generated items to the database, owner dashboard, review
-queue, sign-in pages, flashcards and progress UI. Scanned PDFs (OCR) and PPTX
+Phase 2: owners sign in, upload sources and generate a course from the owner
+pages; generated items are saved to the database. The phase 1 script still
+works for trying sources offline.
+Not built yet: review queue and publishing, student sign-up and paywall pages,
+flashcards and progress UI. Scanned PDFs (OCR) and PPTX
 files aren't supported yet.

@@ -24,6 +24,12 @@ export type Manifest = z.infer<typeof manifestSchema>;
 // College Board material may not be used with generative AI.
 const BLOCKED = /college\s*board|course\s+and\s+exam\s+description|\bCED\b|released\s+(free[- ]response|FRQ)/i;
 
+export function checkSourceAllowed(filename: string, license: string) {
+  if (BLOCKED.test(filename) || BLOCKED.test(license)) {
+    throw new Error(`${filename}: College Board material can't be used with generative AI.`);
+  }
+}
+
 export interface IngestedSources {
   // Chunks the drafting model may see.
   draftable: Chunk[];
@@ -38,9 +44,7 @@ export async function ingestSources(dir: string): Promise<IngestedSources> {
   const seen = new Set<string>();
 
   for (const entry of manifest.files) {
-    if (BLOCKED.test(entry.file) || BLOCKED.test(entry.license)) {
-      throw new Error(`${entry.file}: College Board material can't be used with generative AI. Remove it from the manifest.`);
-    }
+    checkSourceAllowed(entry.file, entry.license);
     const filePath = path.join(dir, entry.file);
     const hash = sha256(await readFile(filePath));
     if (seen.has(hash)) continue; // duplicate upload

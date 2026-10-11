@@ -10,7 +10,9 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "trigger:dev": "npx trigger.dev@4.7.3 dev",
-    "generate": "tsx --tsconfig tsconfig.json scripts/generate-course.ts"
+    "generate": "tsx --tsconfig tsconfig.json scripts/generate-course.ts",
+    "make-owner": "tsx --tsconfig tsconfig.json scripts/make-owner.ts",
+    "test:db": "TEST_DATABASE_URL=${TEST_DATABASE_URL:-postgres://postgres@localhost:5432/postgres} vitest run tests/db"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.133.0",
@@ -19,6 +21,7 @@
     "@trigger.dev/sdk": "^4.7.3",
     "mammoth": "^1.13.0",
     "next": "16.4.0",
+    "postgres": "^3.4.9",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "server-only": "^0.0.1",
