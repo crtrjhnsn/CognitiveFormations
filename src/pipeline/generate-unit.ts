@@ -54,7 +54,7 @@ export function guideParts(guide: Guide): { section: string; part: Grounded & Re
 }
 
 // Text shown to students, without citation metadata, for the overlap check.
-function visibleText(part: Record<string, unknown>): string {
+export function visibleText(part: Record<string, unknown>): string {
   const rest = Object.fromEntries(Object.entries(part).filter(([key]) => key !== "citations" && key !== "gap_filled"));
   return JSON.stringify(rest).replace(/[{}[\]",:]/g, " ");
 }
@@ -143,6 +143,53 @@ export async function generateUnit(llm: Llm, job: UnitJob): Promise<UnitResult> 
   }
 
   return result;
+}
+
+// Drafts one replacement practice question for a unit and runs the same
+// checks as a full run. Used by the review queue's Regenerate button.
+export async function regenerateQuestion(
+  llm: Llm,
+  job: Omit<UnitJob, "questionCount">,
+  previous: Mcq,
+): Promise<{ item: GeneratedItem<Mcq> | null; failure: string | null; usage: UsageRecord[] }> {
+  const result: UnitResult = { unit: job.unit, packChunkIds: [], guide: [], practice: [], dropped: [], failures: [], usage: [] };
+  const unitJob = { ...job, questionCount: 1 };
+  const packById = new Map(job.pack.map((c) => [c.id, c]));
+  const chunkIds = new Set(packById.keys());
+  let task = `Write 1 multiple-choice practice question to replace the one below. Cover the same objectives (${previous.objective_ids.join(
+    ", ",
+  )}) at ${previous.difficulty} difficulty, but write a new question rather than rewording it.\n\nQuestion being replaced: ${previous.stem}`;
+
+  let question: Mcq | null = null;
+  let problems: string[] = [];
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await llm({
+        model: DRAFT_MODEL,
+        effort: "high",
+        system: DRAFT_SYSTEM,
+        context: unitContext(job.course, job.unit, job.pack),
+        task,
+        schema: practiceSetSchema,
+      });
+      result.usage.push({ model: res.servedBy, stage: "draft_practice", usage: res.usage });
+      question = res.output.questions[0] ?? null;
+      problems = question ? validateMcq(question, chunkIds) : ["no question returned"];
+      if (problems.length === 0) break;
+      task += `\n\nYour previous attempt had these problems; fix them:\n- ${problems.join("\n- ")}`;
+    } catch (error) {
+      return { item: null, failure: errorMessage(error), usage: result.usage };
+    }
+  }
+  if (!question) return { item: null, failure: problems.join("; "), usage: result.usage };
+  if (job.course.sourceMode === "materials_only" && question.gap_filled) {
+    return { item: null, failure: "The new question isn't supported by your materials (only-my-materials mode)", usage: result.usage };
+  }
+
+  const item = reviewPart("practice[0]", question, unitJob, packById);
+  if (problems.length) item.flags.push({ kind: "schema_retry_failed", detail: { problems } });
+  else item.flags.push(...(await resolveCheck(llm, unitJob, question, result)));
+  return { item, failure: null, usage: result.usage };
 }
 
 // Asks a different, stronger model to answer without the key. Any

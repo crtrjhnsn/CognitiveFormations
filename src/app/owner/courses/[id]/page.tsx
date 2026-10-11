@@ -114,6 +114,11 @@ export default async function CourseSetupPage({ params }: PageProps<"/owner/cour
           )}
         </div>
         {job && <JobProgress key={`${job.id}:${job.status}`} jobId={job.id} initial={job} />}
+        {["needs_review", "ready", "published"].includes(course.status) && (
+          <Link href={`/owner/courses/${course.id}/review`} className="mt-4 inline-block rounded bg-zinc-900 px-4 py-2 text-sm text-white">
+            {course.status === "needs_review" ? "Review generated content" : "Open review"}
+          </Link>
+        )}
       </section>
     </main>
   );

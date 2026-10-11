@@ -3,6 +3,7 @@ import { resolveTier, type Tier } from "@/lib/access";
 import type { Llm } from "@/lib/ai/llm";
 import type { Sql } from "@/lib/db";
 import type { Chunk } from "@/pipeline/chunk";
+import type { Flag } from "@/pipeline/checks";
 import { generateUnit, type GeneratedItem, type UnitResult } from "@/pipeline/generate-unit";
 import { costOf } from "@/pipeline/report";
 import { buildContextPack } from "@/pipeline/retrieve";
@@ -86,7 +87,7 @@ export async function getJobProgress(sql: Sql, ownerId: string, jobId: string) {
   };
 }
 
-interface JobContext {
+export interface JobContext {
   course: { id: string; title: string; level: string; alignment: string | null; source_mode: "materials_first" | "materials_only" };
   modules: Map<string, { id: string; enabled: boolean; tier: Tier }>;
   draftable: Chunk[];
@@ -95,7 +96,7 @@ interface JobContext {
   chunkUuid: Map<string, string>;
 }
 
-async function loadJobContext(sql: Sql, courseId: string): Promise<JobContext> {
+export async function loadJobContext(sql: Sql, courseId: string): Promise<JobContext> {
   const [course] = await sql<JobContext["course"][]>`
     select id, title, level, alignment, source_mode from courses where id = ${courseId}`;
   const modules = await sql<{ id: string; type: string; enabled: boolean; tier: Tier }[]>`
@@ -184,7 +185,7 @@ async function saveUnitResult(sql: Sql, ctx: JobContext, jobId: string, step: { 
             values (${row.id}, ${chunkId}, ${citation.quoteStart}, ${citation.quoteEnd}) on conflict do nothing`;
         }
         for (const flag of item.flags) {
-          await tx`insert into flags (item_id, item_version, kind, detail) values (${row.id}, 1, ${flag.kind}, ${tx.json(flag.detail as never)})`;
+          await tx`insert into flags (item_id, item_version, kind, detail) values (${row.id}, 1, ${flag.kind}, ${tx.json(storedFlagDetail(ctx, flag) as never)})`;
         }
       }
     };
@@ -199,6 +200,12 @@ async function saveUnitResult(sql: Sql, ctx: JobContext, jobId: string, step: { 
     await tx`update generation_jobs set tokens_in = tokens_in + ${tokensIn}, tokens_out = tokens_out + ${tokensOut},
       cost_estimate = coalesce(cost_estimate, 0) + ${cost} where id = ${jobId}`;
   });
+}
+
+// Flags name chunks by the short ids the model saw; store the real ids.
+export function storedFlagDetail(ctx: Pick<JobContext, "chunkUuid">, flag: Flag): Record<string, unknown> {
+  const chunkId = flag.detail.chunkId;
+  return typeof chunkId === "string" ? { ...flag.detail, chunkId: ctx.chunkUuid.get(chunkId) ?? null } : flag.detail;
 }
 
 async function finishJob(sql: Sql, jobId: string, courseId: string) {
